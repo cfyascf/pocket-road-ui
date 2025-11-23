@@ -1,8 +1,6 @@
 package com.example.pocket_road_ui.ui.components.form
 
-import CustomInput
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun Form(
@@ -64,7 +62,7 @@ fun Form(
             for (field in fields) {
                 CustomInput(
                     value = field.value,
-                    onValueChange = { field.value = it },
+                    onValueChange = field.onValueChange,
                     label = field.label,
                     icon = field.icon,
                     placeholder = field.placeholder,
@@ -74,6 +72,8 @@ fun Form(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             Button(
                 onClick = buttonAction,
@@ -105,4 +105,26 @@ fun Form(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun FormPreview() {
+    var variable = "test"
+
+    Form(
+        title = "Title",
+        fields = listOf(
+            InputData(
+                variable,
+                { newValue -> variable = newValue },
+                "Label",
+                Icons.Default.Email,
+                "placeholder...",
+                KeyboardType.Email,
+                false)),
+        buttonText = "Button",
+        buttonAction = {},
+        isLoading = false
+    )
 }
