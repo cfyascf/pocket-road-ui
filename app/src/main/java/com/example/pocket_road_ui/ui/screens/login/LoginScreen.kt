@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -36,19 +37,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberAsyncImagePainter
 import com.example.pocket_road_ui.data.remote.dto.ApiResponse
-import com.example.pocket_road_ui.data.repository.AuthRepository
 import com.example.pocket_road_ui.data.repository.IAuthRepository
 import com.example.pocket_road_ui.ui.screens.login.LoginViewModel
-
-val ColorGray950 = Color(0xFF030712) // gray-950
-val ColorGray900 = Color(0xFF111827) // gray-900
-val ColorGray800 = Color(0xFF1F2937) // gray-800
-val ColorGray700 = Color(0xFF374151) // gray-700
-val ColorGray400 = Color(0xFF9CA3AF) // gray-400
-val ColorIndigo500 = Color(0xFF6366F1) // indigo-500
-val ColorIndigo600 = Color(0xFF4F46E5) // indigo-600
+import com.example.pocket_road_ui.R
+import com.example.pocket_road_ui.ui.components.Title
+import com.example.pocket_road_ui.ui.theme.AppColors
+import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
 fun LoginScreen(
@@ -57,10 +52,12 @@ fun LoginScreen(
 ) {
 
     Box(
-        modifier = Modifier.fillMaxSize().background(ColorGray950)
+        modifier = Modifier.fillMaxSize().background(AppColors.Gray950)
     ) {
+
+        // background
         Image(
-            painter = rememberAsyncImagePainter("https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=1000"),
+            painter = painterResource(id = R.drawable.login_background),
             contentDescription = "Background Car",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -72,9 +69,9 @@ fun LoginScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            ColorGray950.copy(alpha = 0.4f),
-                            ColorGray950.copy(alpha = 0.8f),
-                            ColorGray950
+                            AppColors.Gray950.copy(alpha = 0.4f),
+                            AppColors.Gray950.copy(alpha = 0.8f),
+                            AppColors.Gray950
                         )
                     )
                 )
@@ -87,36 +84,19 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = Color.White, fontStyle = FontStyle.Italic)) {
-                        append("AUTO")
-                    }
-                    withStyle(style = SpanStyle(color = ColorIndigo500, fontStyle = FontStyle.Italic)) {
-                        append("DEX")
-                    }
-                },
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = (-1).sp
-            )
-            Text(
-                text = "CAPTURE • COLECIONE • COMPITA",
-                color = ColorGray400,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(top = 8.dp, bottom = 48.dp)
-            )
+
+            // title
+            Title(true)
 
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(
                         width = 1.dp,
-                        color = Color.White.copy(alpha = 0.1f), // Borda sutil
+                        color = Color.White.copy(alpha = 0.1f),
                         shape = RoundedCornerShape(24.dp)
                     ),
-                color = Color.Black.copy(alpha = 0.3f), // Fundo preto translúcido
+                color = AppColors.ModalBackground,
                 shape = RoundedCornerShape(24.dp),
             ) {
                 Column(
@@ -125,30 +105,17 @@ fun LoginScreen(
                 ) {
                     Text(
                         text = if (viewModel.isRegistering) "Criar Conta" else "Bem-vindo",
-                        color = Color.White,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
+                        style = AppTypography.ScreenTitle,
                         modifier = Modifier.padding(bottom = 24.dp)
                     )
-
-                    if (viewModel.isRegistering) {
-                        CustomInput(
-                            value = viewModel.username,
-                            onValueChange = { viewModel.username = it },
-                            label = "NOME DE PILOTO",
-                            icon = Icons.Default.Person,
-                            placeholder = "Ex: DriftKing"
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
 
                     CustomInput(
                         value = viewModel.username,
                         onValueChange = { viewModel.username = it },
                         label = "USERNAME",
                         icon = Icons.Default.Email,
-                        placeholder = "seu@email.com",
-                        keyboardType = KeyboardType.Email
+                        placeholder = "driftking",
+                        keyboardType = KeyboardType.Text
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -164,7 +131,7 @@ fun LoginScreen(
                     if (!viewModel.isRegistering) {
                         Text(
                             text = "Esqueceu a senha?",
-                            color = ColorIndigo500,
+                            color = AppColors.Red500,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier
@@ -184,7 +151,7 @@ fun LoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = ColorIndigo600),
+                        colors = ButtonDefaults.buttonColors(containerColor = AppColors.Red600),
                         shape = RoundedCornerShape(12.dp),
                         elevation = ButtonDefaults.buttonElevation(8.dp)
                     ) {
@@ -219,7 +186,7 @@ fun LoginScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = if (viewModel.isRegistering) "Já tem uma conta? " else "Ainda não tem conta? ",
-                    color = ColorGray400,
+                    color = AppColors.Gray400,
                     fontSize = 14.sp
                 )
                 Text(
@@ -249,7 +216,7 @@ fun CustomInput(
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
-            color = ColorGray400,
+            color = AppColors.Gray400,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -260,15 +227,15 @@ fun CustomInput(
                 .fillMaxWidth()
                 .height(56.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(ColorGray900.copy(alpha = 0.5f))
-                .border(1.dp, ColorGray700, RoundedCornerShape(12.dp))
+                .background(AppColors.Gray900.copy(alpha = 0.5f))
+                .border(1.dp, AppColors.Gray700, RoundedCornerShape(12.dp))
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = ColorGray700,
+                tint = AppColors.Gray700,
                 modifier = Modifier.size(20.dp)
             )
 
@@ -288,7 +255,7 @@ fun CustomInput(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
                     visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
-                    cursorBrush = SolidColor(ColorIndigo500)
+                    cursorBrush = SolidColor(AppColors.Red500)
                 )
             }
 
@@ -297,7 +264,7 @@ fun CustomInput(
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                         contentDescription = "Toggle Password",
-                        tint = ColorGray700,
+                        tint = AppColors.Gray700,
                         modifier = Modifier.size(20.dp)
                     )
                 }
