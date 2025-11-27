@@ -1,42 +1,19 @@
 package com.example.pocket_road_ui.ui.screens.home
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.rememberAsyncImagePainter
-import com.example.pocket_road_ui.ui.screens.home.components.CarCard
+import com.example.pocket_road_ui.ui.components.CarCard
 import com.example.pocket_road_ui.ui.screens.home.components.HomeFooter
 import com.example.pocket_road_ui.ui.screens.home.components.HomeHeader
 import com.example.pocket_road_ui.ui.screens.home.components.StatsRow
@@ -61,7 +38,7 @@ val mockCars = listOf(
 )
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onNavigateToCarDetail: (carId: Int) -> Unit) {
     Scaffold(
         containerColor = AppColors.Gray950,
         topBar = { HomeHeader() },
@@ -109,7 +86,7 @@ fun HomeScreen() {
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(mockCars) { car ->
-                    CarCard(car)
+                    CarCard(car, { onNavigateToCarDetail(car.id) })
                 }
             }
         }
@@ -119,5 +96,5 @@ fun HomeScreen() {
 @Preview
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen()
+    HomeScreen(onNavigateToCarDetail = {})
 }

@@ -1,4 +1,4 @@
-package com.example.pocket_road_ui.ui.screens.home.components
+package com.example.pocket_road_ui.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,16 +26,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.pocket_road_ui.ui.screens.home.CarMock
+import com.example.pocket_road_ui.ui.screens.home.mockCars
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
-fun CarCard(car: CarMock) {
+fun CarCard(car: CarMock, onClick: (carId: Int) -> Unit) {
     val borderColor = if (car.unlocked) AppColors.Gray700 else AppColors.Gray800
 
     Box(
@@ -45,8 +46,10 @@ fun CarCard(car: CarMock) {
             .clip(RoundedCornerShape(16.dp))
             .background(AppColors.Gray900)
             .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-            .clickable(enabled = car.unlocked) { /* Open Details */ }
-    ) {
+            .clickable(enabled = car.unlocked) {
+                onClick(car.id)
+            }
+        ) {
         // Imagem de Fundo
         Image(
             painter = rememberAsyncImagePainter(car.imageUrl),
@@ -115,7 +118,7 @@ fun CarCard(car: CarMock) {
                         text = "DESCONHECIDO",
                         style = AppTypography.Tagline.copy(
                             fontSize = 10.sp,
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                            fontFamily = FontFamily.Monospace
                         )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -126,35 +129,8 @@ fun CarCard(car: CarMock) {
     }
 }
 
+@Preview
 @Composable
-fun RarityBadge(rarity: String) {
-    val (bgColor, textColor) = when (rarity.lowercase()) {
-        "comum" -> Pair(AppColors.Gray700, Color.White)
-        "incomum" -> Pair(Color(0xFF22C55E), Color.White) // Green-500
-        "raro" -> Pair(Color(0xFF3B82F6), Color.White) // Blue-500
-        "exotico" -> Pair(Color(0xFFA855F7), Color.White) // Purple-500
-        "lendario" -> Pair(Color(0xFFEAB308), Color.Black) // Yellow-500
-        else -> Pair(AppColors.Gray700, Color.White)
-    }
-
-    Surface(
-        color = bgColor,
-        shape = RoundedCornerShape(4.dp),
-        modifier = Modifier.height(16.dp)
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(horizontal = 6.dp)
-        ) {
-            Text(
-                text = rarity.uppercase(),
-                style = AppTypography.Tagline.copy(
-                    fontSize = 8.sp,
-                    color = textColor,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
-                )
-            )
-        }
-    }
+fun CarCardPreview() {
+    CarCard(mockCars[0], onClick = {})
 }
