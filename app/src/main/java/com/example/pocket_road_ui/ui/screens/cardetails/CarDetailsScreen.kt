@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,7 +32,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.pocket_road_ui.ui.screens.cardetails.components.PaddingBox
 import com.example.pocket_road_ui.ui.screens.cardetails.components.SpecRow
 import com.example.pocket_road_ui.ui.screens.cardetails.components.StatGridItem
-import com.example.pocket_road_ui.ui.screens.home.CarMock
+import com.example.pocket_road_ui.ui.screens.cardex.CarMock
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 

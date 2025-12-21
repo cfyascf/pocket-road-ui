@@ -1,4 +1,4 @@
-package com.example.pocket_road_ui.ui.screens.home
+package com.example.pocket_road_ui.ui.screens.cardex
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,9 +14,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocket_road_ui.ui.components.CarCard
-import com.example.pocket_road_ui.ui.screens.home.components.HomeFooter
-import com.example.pocket_road_ui.ui.screens.home.components.HomeHeader
-import com.example.pocket_road_ui.ui.screens.home.components.StatsRow
+import com.example.pocket_road_ui.ui.components.Navbar
+import com.example.pocket_road_ui.ui.screens.cardex.components.CardexHeader
+import com.example.pocket_road_ui.ui.screens.cardex.components.StatsRow
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 data class CarMock(
@@ -38,11 +38,17 @@ val mockCars = listOf(
 )
 
 @Composable
-fun HomeScreen(onNavigateToCarDetail: (carId: Int) -> Unit) {
+fun CardexScreen(onNavigateToCarDetail: (carId: Int) -> Unit,
+                 onNavigateToCardexScreen: () -> Unit,
+                 onNavigateToCaptureScreen: () -> Unit,
+               onNavigateToProfileScreen: () -> Unit) {
     Scaffold(
         containerColor = AppColors.Gray950,
-        topBar = { HomeHeader() },
-        bottomBar = { HomeFooter() }
+        topBar = { CardexHeader() },
+        bottomBar = { Navbar(
+            { onNavigateToCardexScreen() },
+            { onNavigateToCaptureScreen() },
+            {onNavigateToProfileScreen() }) }
     ) { paddingValues ->
 
         Column(
@@ -95,6 +101,10 @@ fun HomeScreen(onNavigateToCarDetail: (carId: Int) -> Unit) {
 
 @Preview
 @Composable
-fun HomeScreenPreview() {
-    HomeScreen(onNavigateToCarDetail = {})
+fun CardexScreenPreview() {
+    CardexScreen(
+        onNavigateToCarDetail = {},
+        onNavigateToCardexScreen = {},
+        onNavigateToCaptureScreen = {},
+        onNavigateToProfileScreen = {})
 }

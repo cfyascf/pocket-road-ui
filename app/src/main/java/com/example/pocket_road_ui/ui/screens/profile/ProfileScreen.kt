@@ -1,5 +1,6 @@
 package com.example.pocket_road_ui.ui.screens.profile
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -10,8 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
@@ -19,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -29,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocket_road_ui.R
 import com.example.pocket_road_ui.ui.components.UserProfileCard
-import com.example.pocket_road_ui.ui.screens.home.components.HomeFooter
+import com.example.pocket_road_ui.ui.components.Navbar
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
@@ -51,11 +49,17 @@ val mockFriends = listOf(
 @Composable
 fun ProfileScreen(
     onLogout: () -> Unit,
-    onFriendClick: (Int) -> Unit // Futuro: ver perfil do amigo
+    onFriendClick: (Int) -> Unit,
+    onNavigateToCardexScreen: () -> Unit,
+    onNavigateToCaptureScreen: () -> Unit,
+    onNavigateToProfileScreen: () -> Unit
 ) {
     Scaffold(
         containerColor = AppColors.Gray950,
-        bottomBar = { HomeFooter() } // Mantemos a navegação
+        bottomBar = { Navbar(
+            { onNavigateToCardexScreen() },
+            { onNavigateToCaptureScreen() },
+            {onNavigateToProfileScreen() }) }
     ) { paddingValues ->
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -161,7 +165,7 @@ fun FriendItem(friend: FriendMock, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         color = AppColors.Gray900,
         shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.Gray800)
+        border = BorderStroke(1.dp, AppColors.Gray800)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -236,5 +240,10 @@ fun LogoutButton(onClick: () -> Unit) {
 @Preview
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen(onLogout = {}, onFriendClick = {})
+    ProfileScreen(
+        onLogout = {},
+        onFriendClick = {},
+        onNavigateToCardexScreen = {},
+        onNavigateToCaptureScreen = {},
+        onNavigateToProfileScreen = {})
 }

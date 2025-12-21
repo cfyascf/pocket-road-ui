@@ -1,4 +1,4 @@
-package com.example.pocket_road_ui.ui.screens.home.components
+package com.example.pocket_road_ui.ui.screens.cardex.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

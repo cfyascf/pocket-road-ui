@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.example.pocket_road_ui.R
 import com.example.pocket_road_ui.ui.components.CarCard
 import com.example.pocket_road_ui.ui.components.UserProfileCard
-import com.example.pocket_road_ui.ui.screens.home.mockCars
+import com.example.pocket_road_ui.ui.screens.cardex.mockCars
 import com.example.pocket_road_ui.ui.screens.profile.mockFriends
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography

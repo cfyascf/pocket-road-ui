@@ -30,7 +30,7 @@ fun Title(subtitle: Boolean) {
         Text(
             text = "CAPTURE • COLECIONE • COMPITA",
             style = AppTypography.Tagline,
-            modifier = Modifier.padding(top = 8.dp, bottom = 48.dp)
+            modifier = Modifier.padding(top = 8.dp)
         )
     }
 }

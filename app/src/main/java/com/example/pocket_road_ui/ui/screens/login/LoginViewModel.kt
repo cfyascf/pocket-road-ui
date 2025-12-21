@@ -10,6 +10,9 @@ import com.example.pocket_road_ui.ui.components.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -17,89 +20,108 @@ class LoginViewModel @Inject constructor(
     private val repository: IAuthRepository
 ) : ViewModel() {
 
-    // State to control the UI
-    var username by mutableStateOf("")
-    var email by mutableStateOf("")
-    var password by mutableStateOf("")
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState = _uiState.asStateFlow()
 
-    var isLoading by mutableStateOf(false)
-    var errorMessage by mutableStateOf<String?>(null)
-    var loginSuccess by mutableStateOf(false)
-    var isRegistering by mutableStateOf(false)
-    var notificationMessage by mutableStateOf<String?>(null)
-    var showNotification by mutableStateOf(false)
-    var notificationType by mutableStateOf(NotificationType.ERROR)
+    fun onUsernameChange(newValue: String) {
+        _uiState.update { it.copy(username = newValue) }
+    }
+
+    fun onEmailChange(newValue: String) {
+        _uiState.update { it.copy(email = newValue) }
+    }
+
+    fun onPasswordChange(newValue: String) {
+        _uiState.update { it.copy(password = newValue) }
+    }
+
+    fun toggleRegisterMode() {
+        _uiState.update { it.copy(isRegistering = !it.isRegistering) }
+    }
 
     fun onLoginClick(onNavigateToHomePage: () -> Unit) {
         viewModelScope.launch {
-            isLoading = true
-            errorMessage = null
-            showNotification = false
 
-            val result = repository.login(username, password)
+            _uiState.update {
+                it.copy(isLoading = true, notification = null)
+            }
+
+            val currentState = _uiState.value
+            val result = repository.login(currentState.username, currentState.password)
 
             result.onSuccess { response ->
-                // Here you would save the token to SharedPreferences/DataStore
-                isLoading = false
-                loginSuccess = true
-                notificationType = NotificationType.SUCCESS
-                notificationMessage = "Login efetivado com sucesso!"
-                showNotification = true
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        loginSuccess = true,
+                        notification = NotificationData(
+                            response.message,
+                            NotificationType.SUCCESS
+                        )
+                    )
+                }
+
+                delay(3000)
+                onNavigateToHomePage()
             }
 
             result.onFailure { error ->
-                isLoading = false
-                errorMessage = error.message ?: "Unknown error"
-                notificationType = NotificationType.ERROR
-                if (error is retrofit2.HttpException && error.code() == 400) {
-                    notificationMessage = "Este usuário ou email já existe."
-                } else {
-                    notificationMessage = "Erro de conexão: ${error.message}"
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        loginSuccess = false,
+                        notification = NotificationData(
+                            error.message,
+                            NotificationType.ERROR
+                        )
+                    )
                 }
-
-                showNotification = true
             }
         }
-
-        onNavigateToHomePage()
     }
 
     fun onRegisterClick(onNavigateToHomePage: () -> Unit) {
         viewModelScope.launch {
-            isLoading = true
-            errorMessage = null
-            showNotification = false
+            _uiState.update {
+                it.copy(isLoading = true, notification = null)
+            }
 
-            val result = repository.register(username, email, password)
+            val currentState = _uiState.value
+            val result = repository.register(currentState.username, currentState.email, currentState.password)
 
             result.onSuccess { response ->
                 // Here you would save the token to SharedPreferences/DataStore
-                isLoading = false
-                loginSuccess = true
-                notificationType = NotificationType.SUCCESS
-                notificationMessage = "Conta criada com sucesso!"
-                showNotification = true
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        loginSuccess = true,
+                        notification = NotificationData(
+                            response.message,
+                            NotificationType.SUCCESS
+                        )
+                    )
+                }
 
                 delay(1000)
                 onNavigateToHomePage()
             }
 
             result.onFailure { error ->
-                isLoading = false
-                errorMessage = error.message ?: "Unknown error"
-                notificationType = NotificationType.ERROR
-                if (error is retrofit2.HttpException && error.code() == 400) {
-                    notificationMessage = "Este usuário ou email já existe."
-                } else {
-                    notificationMessage = "Erro de conexão: ${error.message}"
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        loginSuccess = false,
+                        notification = NotificationData(
+                            error.message,
+                            NotificationType.ERROR
+                        )
+                    )
                 }
-
-                showNotification = true
             }
         }
     }
 
     fun dismissNotification() {
-        showNotification = false
+        _uiState.update { it.copy(notification = null) }
     }
 }

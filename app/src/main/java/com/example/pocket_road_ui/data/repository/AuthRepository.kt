@@ -1,16 +1,12 @@
 package com.example.pocket_road_ui.data.repository
 
+import com.example.pocket_road_ui.data.interfaces.IAuthRepository
 import com.example.pocket_road_ui.data.remote.api.AuthApi
 import com.example.pocket_road_ui.data.remote.dto.ApiResponse
 import com.example.pocket_road_ui.data.remote.dto.LoginRequest
 import com.example.pocket_road_ui.data.remote.dto.RegisterRequest
 import com.example.pocket_road_ui.domain.models.User
 import jakarta.inject.Inject
-
-interface IAuthRepository {
-    suspend fun login(username: String, password: String): Result<ApiResponse<String?>>
-    suspend fun register(username: String, email: String, password: String): Result<ApiResponse<User?>>
-}
 
 open class AuthRepository @Inject constructor(
     private val api: AuthApi

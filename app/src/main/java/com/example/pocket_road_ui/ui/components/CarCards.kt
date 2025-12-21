@@ -31,8 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.pocket_road_ui.ui.screens.home.CarMock
-import com.example.pocket_road_ui.ui.screens.home.mockCars
+import com.example.pocket_road_ui.ui.screens.cardex.CarMock
+import com.example.pocket_road_ui.ui.screens.cardex.mockCars
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 

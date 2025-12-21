@@ -32,23 +32,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pocket_road_ui.data.remote.dto.ApiResponse
 import com.example.pocket_road_ui.data.repository.IAuthRepository
 import com.example.pocket_road_ui.ui.screens.login.LoginViewModel
 import com.example.pocket_road_ui.R
 import com.example.pocket_road_ui.data.repository.AuthRepositoryMock
 import com.example.pocket_road_ui.domain.models.User
+import com.example.pocket_road_ui.ui.components.NotificationType
 import com.example.pocket_road_ui.ui.components.PopupNotification
 import com.example.pocket_road_ui.ui.components.Title
 import com.example.pocket_road_ui.ui.components.form.Form
 import com.example.pocket_road_ui.ui.components.form.InputData
 import com.example.pocket_road_ui.ui.theme.AppColors
+import com.example.pocket_road_ui.ui.theme.AppDimensions
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    onNavigateToHomeScreen: () -> Unit
+    onNavigateToCardexScreen: () -> Unit
 ) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(
         modifier = Modifier.fillMaxSize().background(AppColors.Gray950)
@@ -76,6 +80,7 @@ fun LoginScreen(
                 )
         )
 
+        // content
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -86,10 +91,12 @@ fun LoginScreen(
 
             Title(true)
 
+            Spacer(modifier = Modifier.height(30.dp))
+
             val fields = mutableListOf<InputData>(
                 InputData(
-                    viewModel.username,
-                    { viewModel.username = it },
+                    state.username,
+                    { viewModel.onUsernameChange(it) },
                     "USERNAME",
                     Icons.Default.Email,
                     "driftking",
@@ -98,11 +105,11 @@ fun LoginScreen(
                 )
             )
 
-            if(viewModel.isRegistering) {
+            if(state.isRegistering) {
                 fields.add(
                     InputData(
-                        viewModel.email,
-                        { viewModel.email = it },
+                        state.email,
+                        { viewModel.onEmailChange(it) },
                         "EMAIL",
                         Icons.Default.Email,
                         "email@gmail.com",
@@ -113,8 +120,8 @@ fun LoginScreen(
 
             fields.add(
                 InputData(
-                    viewModel.password,
-                    { viewModel.password = it },
+                    state.password,
+                    { viewModel.onPasswordChange(it) },
                     "PASSWORD",
                     Icons.Default.Lock,
                     ".........",
@@ -123,19 +130,19 @@ fun LoginScreen(
                 ))
 
             Form(
-                title = if (viewModel.isRegistering) "Criar Conta" else "Bem-vindo",
+                title = if (state.isRegistering) "Criar Conta" else "Bem-vindo",
                 fields = fields,
-                buttonText = if (viewModel.isRegistering) "Cadastrar" else "Entrar",
+                buttonText = if (state.isRegistering) "Cadastrar" else "Entrar",
                 buttonAction = {
-                    if (viewModel.isRegistering)
-                        viewModel.onRegisterClick(onNavigateToHomeScreen)
+                    if (state.isRegistering)
+                        viewModel.onRegisterClick(onNavigateToCardexScreen)
                     else
-                        viewModel.onLoginClick(onNavigateToHomeScreen)
+                        viewModel.onLoginClick(onNavigateToCardexScreen)
                 },
-                isLoading = viewModel.isLoading
+                isLoading = state.isLoading
             )
 
-            if (!viewModel.isRegistering) {
+            if (!state.isRegistering) {
                 Text(
                     text = "Esqueceu a senha?",
                     color = AppColors.Red500,
@@ -152,21 +159,21 @@ fun LoginScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 48.dp)
+                .padding(bottom = AppDimensions.navBarBottomPadding + 20.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = if (viewModel.isRegistering) "Já tem uma conta? " else "Ainda não tem conta? ",
+                    text = if (state.isRegistering) "Já tem uma conta? " else "Ainda não tem conta? ",
                     color = AppColors.Gray400,
                     fontSize = 14.sp
                 )
                 Text(
-                    text = if (viewModel.isRegistering) "Faça Login" else "Registre-se",
+                    text = if (state.isRegistering) "Faça Login" else "Registre-se",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     modifier = Modifier.clickable {
-                        viewModel.isRegistering = !viewModel.isRegistering
+                        viewModel.toggleRegisterMode()
                     }
                 )
             }
@@ -174,12 +181,12 @@ fun LoginScreen(
 
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopCenter // Alinha no topo
+            contentAlignment = Alignment.TopCenter
         ) {
             PopupNotification(
-                viewModel.notificationMessage,
-                viewModel.notificationType,
-                viewModel.showNotification,
+                state.notification?.message,
+                state.notification?.type ?: NotificationType.ERROR,
+                state.notification != null,
                 { viewModel.dismissNotification() }
             )
         }
@@ -193,5 +200,5 @@ fun LoginScreenPreview() {
     val fakeRepo = AuthRepositoryMock()
     val fakeVM = LoginViewModel(fakeRepo)
 
-    LoginScreen(fakeVM, onNavigateToHomeScreen = {})
+    LoginScreen(fakeVM, onNavigateToCardexScreen = {})
 }

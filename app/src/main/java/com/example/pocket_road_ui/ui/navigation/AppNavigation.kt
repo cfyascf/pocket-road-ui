@@ -7,18 +7,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.pocket_road_ui.ui.extensions.navigateSingleTopTo
 import com.example.pocket_road_ui.ui.screens.cardetails.CarDetailScreen
-import com.example.pocket_road_ui.ui.screens.home.HomeScreen
-import com.example.pocket_road_ui.ui.screens.home.mockCars
+import com.example.pocket_road_ui.ui.screens.cardex.CardexScreen
+import com.example.pocket_road_ui.ui.screens.cardex.mockCars
+import com.example.pocket_road_ui.ui.screens.profile.ProfileScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login_screen")
-    object Home : Screen("home_screen")
+    object Cardex : Screen("cardex_screen")
     object CarDetail : Screen("car_detail_screen/{carId}") {
         const val ARG_CAR_ID = "carId"
 
         fun createRoute(carId: Int) = "car_detail_screen/$carId"
     }
+
+    object Profile : Screen("profile_screen")
 }
 
 @Composable
@@ -27,8 +31,8 @@ fun AppNavigation() {
 
     NavHost(navController = navController, startDestination = Screen.Login.route) {
         composable(route = Screen.Login.route) {
-            LoginScreen(onNavigateToHomeScreen = {
-                navController.navigate(Screen.Home.route) {
+            LoginScreen(onNavigateToCardexScreen = {
+                navController.navigate(Screen.Cardex.route) {
 
                     // removes login screen from pile (user cannot come back to it)
                     popUpTo(Screen.Login.route) { inclusive = true }
@@ -36,11 +40,14 @@ fun AppNavigation() {
             })
         }
 
-        composable(route = Screen.Home.route) {
-            HomeScreen(
+        composable(route = Screen.Cardex.route) {
+            CardexScreen(
                 onNavigateToCarDetail = { carId ->
                     navController.navigate(Screen.CarDetail.createRoute(carId))
-                }
+                },
+                onNavigateToCardexScreen = { navController.navigateSingleTopTo(Screen.Cardex.route) },
+                onNavigateToCaptureScreen = { navController.navigate(Screen.Cardex.route) },
+                onNavigateToProfileScreen = { navController.navigate(Screen.Profile.route) }
             )
         }
 
@@ -59,6 +66,16 @@ fun AppNavigation() {
                     onClose = { navController.popBackStack() }
                 )
             }
+        }
+
+        composable(route = Screen.Profile.route) {
+            ProfileScreen(
+                onLogout = {},
+                onFriendClick = {},
+                onNavigateToCardexScreen = { navController.navigate(Screen.Cardex.route) },
+                onNavigateToCaptureScreen = { navController.navigate(Screen.Cardex.route) },
+                onNavigateToProfileScreen = { navController.navigateSingleTopTo(Screen.Cardex.route) }
+            )
         }
     }
 }

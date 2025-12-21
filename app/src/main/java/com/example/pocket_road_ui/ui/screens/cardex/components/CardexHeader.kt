@@ -1,5 +1,6 @@
-package com.example.pocket_road_ui.ui.screens.home.components
+package com.example.pocket_road_ui.ui.screens.cardex.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,29 +23,34 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocket_road_ui.ui.theme.AppColors
+import com.example.pocket_road_ui.ui.theme.AppDimensions
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
-fun HomeHeader() {
+fun CardexHeader() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp) // Altura para acomodar o botão flutuante
+            .height(AppDimensions.statusBarTopPadding + 80.dp)
     ) {
         Surface(
             modifier = Modifier
-                //.align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .height(64.dp),
+                .height(AppDimensions.statusBarTopPadding + 92.dp),
             color = AppColors.Gray900.copy(alpha = 0.95f),
-            border = androidx.compose.foundation.BorderStroke(1.dp, AppColors.Gray800)
+            border = BorderStroke(1.dp, AppColors.Gray800)
         ) {
             Row(
                 modifier = Modifier
-                    .padding(16.dp),
+                    .padding(
+                        top = AppDimensions.statusBarTopPadding + 16.dp,
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -85,11 +91,17 @@ fun HomeHeader() {
                         Icon(
                             imageVector = Icons.Default.EmojiEvents,
                             contentDescription = "Rank",
-                            tint = Color(0xFFEAB308) // Yellow-500
+                            tint = Color(0xFFEAB308)
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun CardexHeaderPreview() {
+    CardexHeader()
 }
