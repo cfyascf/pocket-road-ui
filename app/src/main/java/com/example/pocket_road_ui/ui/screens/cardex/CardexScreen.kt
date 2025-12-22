@@ -51,9 +51,9 @@ fun CardexScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             StatsRow(
-                state.capturedCount,
-                state.garageValue,
-                state.ranking
+                state.kpis.capturedCount,
+                state.kpis.garageValue,
+                state.kpis.ranking
             )
 
             Spacer(modifier = Modifier.height(24.dp))

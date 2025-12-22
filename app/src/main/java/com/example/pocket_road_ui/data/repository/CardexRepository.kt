@@ -1,13 +1,11 @@
 package com.example.pocket_road_ui.data.repository
 
-import com.example.pocket_road_ui.data.interfaces.IAuthRepository
 import com.example.pocket_road_ui.data.interfaces.ICardexRepository
 import com.example.pocket_road_ui.data.remote.api.CardexApi
 import com.example.pocket_road_ui.data.remote.dto.ApiResponse
 import com.example.pocket_road_ui.data.remote.dto.CarDto
+import com.example.pocket_road_ui.data.remote.dto.CarDetailsDto
 import com.example.pocket_road_ui.data.remote.dto.UserCardexDto
-import com.example.pocket_road_ui.domain.models.Car
-import com.example.pocket_road_ui.domain.models.User
 import jakarta.inject.Inject
 
 open class CardexRepository @Inject constructor(
@@ -16,6 +14,15 @@ open class CardexRepository @Inject constructor(
     override suspend fun getCardex(userId: String): Result<ApiResponse<UserCardexDto?>> {
         return try {
             val response = api.getCardex(userId)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getCarDetails(carId: String): Result<ApiResponse<CarDetailsDto?>> {
+        return try {
+            val response = api.getCarDetails(carId)
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
@@ -49,5 +56,9 @@ open class CardexRepositoryMock() : ICardexRepository {
         )
         return Result.success(ApiResponse(
             "mock", status = true, data = userCardexDto))
+    }
+
+    override suspend fun getCarDetails(carId: String): Result<ApiResponse<CarDetailsDto?>> {
+        TODO("Not yet implemented")
     }
 }

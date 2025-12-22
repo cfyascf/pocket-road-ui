@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.pocket_road_ui.data.interfaces.ICardexRepository
 import com.example.pocket_road_ui.data.local.SessionManager
-import com.example.pocket_road_ui.data.remote.dto.CarDto
-import com.example.pocket_road_ui.domain.mapper.ToEntity
+import com.example.pocket_road_ui.domain.mapper.toEntity
+import com.example.pocket_road_ui.domain.models.CardexKpis
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -57,14 +56,15 @@ class CardexViewModel @Inject constructor(
                     return@launch
                 }
 
-                val cars = data.cars.map { it.ToEntity() }
+                val cars = data.cars.map { it.toEntity() }
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         cars = cars,
-                        capturedCount = data.capturedCount,
-                        garageValue = data.garageValue,
-                        ranking = data.ranking
+                        kpis = CardexKpis(
+                            data.capturedCount,
+                            data.garageValue,
+                            data.ranking)
                     )
                 }
             }

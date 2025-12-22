@@ -52,18 +52,13 @@ fun AppNavigation(navController: NavHostController) {
         composable(
             route = Screen.CarDetail.route,
             arguments = listOf(
-                navArgument(Screen.CarDetail.ARG_CAR_ID) { type = NavType.IntType }
+                navArgument(Screen.CarDetail.ARG_CAR_ID) { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val carId = backStackEntry.arguments?.getString(Screen.CarDetail.ARG_CAR_ID)
-            val car = mockCars.find { it.id == carId }
 
-            if (car != null) {
-                CarDetailScreen(
-                    car = car,
-                    onClose = { navController.popBackStack() }
-                )
-            }
+            CarDetailScreen(
+                onClose = { navController.popBackStack() }
+            )
         }
 
         composable(route = Screen.Profile.route) {
