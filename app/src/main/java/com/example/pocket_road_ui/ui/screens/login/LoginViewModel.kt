@@ -1,11 +1,9 @@
 package com.example.pocket_road_ui.ui.screens.login
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pocket_road_ui.data.repository.IAuthRepository
+import com.example.pocket_road_ui.data.interfaces.IAuthRepository
+import com.example.pocket_road_ui.data.local.SessionManager
 import com.example.pocket_road_ui.ui.components.NotificationType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
@@ -17,7 +15,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val repository: IAuthRepository
+    private val repository: IAuthRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -61,6 +60,24 @@ class LoginViewModel @Inject constructor(
                     )
                 }
 
+                val data = response.data
+                if (data == null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            loginSuccess = false,
+                            notification = NotificationData(
+                                "Error",
+                                NotificationType.ERROR
+                            )
+                        )
+                    }
+
+                    return@launch
+                }
+
+                sessionManager.saveAuthInfo(data.token, data.userId)
+
                 delay(3000)
                 onNavigateToHomePage()
             }
@@ -101,6 +118,24 @@ class LoginViewModel @Inject constructor(
                         )
                     )
                 }
+
+                val data = response.data
+                if (data == null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            loginSuccess = false,
+                            notification = NotificationData(
+                                "Error",
+                                NotificationType.ERROR
+                            )
+                        )
+                    }
+
+                    return@launch
+                }
+
+                sessionManager.saveAuthInfo(data.token, data.userId)
 
                 delay(1000)
                 onNavigateToHomePage()

@@ -13,35 +13,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.pocket_road_ui.ui.components.CarCard
 import com.example.pocket_road_ui.ui.components.Navbar
 import com.example.pocket_road_ui.ui.screens.cardex.components.CardexHeader
 import com.example.pocket_road_ui.ui.screens.cardex.components.StatsRow
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
-data class CarMock(
-    val id: Int,
-    val name: String,
-    val brand: String,
-    val rarity: String,
-    val unlocked: Boolean,
-    val imageUrl: String
-)
-
-val mockCars = listOf(
-    CarMock(1, "Civic Type R", "Honda", "incomum", true, "https://images.unsplash.com/photo-1605816988069-b112b322ebcc?auto=format&fit=crop&q=80&w=800"),
-    CarMock(2, "911 GT3 RS", "Porsche", "lendario", true, "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=800"),
-    CarMock(3, "Huracán Evo", "Lamborghini", "exotico", false, "https://images.unsplash.com/photo-1566024287286-457247b70310?auto=format&fit=crop&q=80&w=800"),
-    CarMock(4, "Mustang Mach 1", "Ford", "raro", false, "https://images.unsplash.com/photo-1584345604476-8ec5e12e42dd?auto=format&fit=crop&q=80&w=800"),
-    CarMock(5, "M4 Competition", "BMW", "raro", false, "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&q=80&w=800"),
-    CarMock(6, "Supra MK5", "Toyota", "raro", true, "https://images.unsplash.com/photo-1627454820574-fb05247d6297?auto=format&fit=crop&q=80&w=800")
-)
 
 @Composable
-fun CardexScreen(onNavigateToCarDetail: (carId: Int) -> Unit,
-                 onNavigateToCardexScreen: () -> Unit,
-                 onNavigateToCaptureScreen: () -> Unit,
-               onNavigateToProfileScreen: () -> Unit) {
+fun CardexScreen(
+    viewModel: CardexViewModel = hiltViewModel(),
+    onNavigateToCarDetail: (carId: String) -> Unit,
+    onNavigateToCardexScreen: () -> Unit,
+    onNavigateToCaptureScreen: () -> Unit,
+    onNavigateToProfileScreen: () -> Unit)
+{
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         containerColor = AppColors.Gray950,
         topBar = { CardexHeader() },
@@ -60,7 +50,11 @@ fun CardexScreen(onNavigateToCarDetail: (carId: Int) -> Unit,
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            StatsRow()
+            StatsRow(
+                state.capturedCount,
+                state.garageValue,
+                state.ranking
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -91,8 +85,8 @@ fun CardexScreen(onNavigateToCarDetail: (carId: Int) -> Unit,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                items(mockCars) { car ->
-                    CarCard(car, { onNavigateToCarDetail(car.id) })
+                items(state.cars) { car ->
+                    CarCard(car) { onNavigateToCarDetail(car.id) }
                 }
             }
         }

@@ -85,4 +85,6 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.androidx.material.icons.extended)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.okhttp.logging.interceptor)
 }

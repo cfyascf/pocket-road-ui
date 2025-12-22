@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,18 +27,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocket_road_ui.R
+import com.example.pocket_road_ui.domain.enums.CarRarity
+import com.example.pocket_road_ui.domain.models.Car
 import com.example.pocket_road_ui.ui.components.CarCard
 import com.example.pocket_road_ui.ui.components.UserProfileCard
-import com.example.pocket_road_ui.ui.screens.cardex.mockCars
 import com.example.pocket_road_ui.ui.screens.profile.mockFriends
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
+val mockCars = listOf<Car>(
+    Car("1", "Civic Type R", "Honda", CarRarity.RARE, "https://images"),
+    Car("2", "911 GT3 RS", "Porsche", CarRarity.LEGENDARY, "https://images"),
+    Car("3", "Huracán Evo", "Lamborghini", CarRarity.EXOTIC, "https://images"),
+    Car("4", "Mustang Mach 1", "Ford", CarRarity.RARE, "https://images"),
+    Car("5", "M4 Competition", "BMW", CarRarity.RARE, "https://images"),
+)
 @Composable
 fun FriendProfileScreen(
     friendId: Int,
     onBackClick: () -> Unit,
-    onCarClick: (Int) -> Unit
+    onCarClick: (String) -> Unit
 ) {
     // Simulando busca de dados baseada no ID
     val friend = mockFriends.find { it.id == friendId } ?: mockFriends[0]
@@ -46,8 +55,7 @@ fun FriendProfileScreen(
     // (Em um app real, isso viria da API)
     val friendCars = remember(friendId) {
         mockCars.map { car ->
-            // Randomiza um pouco para parecer diferente da sua garagem
-            car.copy(unlocked = (car.id + friendId) % 2 != 0 || car.id == 2)
+            car.copy()
         }
     }
 
@@ -70,7 +78,7 @@ fun FriendProfileScreen(
                         .size(40.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.Default.ArrowBackIosNew,
                         contentDescription = "Back",
                         tint = Color.White
                     )
@@ -109,7 +117,7 @@ fun FriendProfileScreen(
 
                 // 2. Título da Seção
                 Text(
-                    text = "COLEÇÃO (${friendCars.count { it.unlocked }}/${friendCars.size})",
+                    text = "COLEÇÃO (${friendCars.count()}/${friendCars.size})",
                     style = AppTypography.Tagline.copy(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.5.sp

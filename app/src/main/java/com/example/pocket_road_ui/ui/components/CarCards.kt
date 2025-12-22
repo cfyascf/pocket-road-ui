@@ -31,45 +31,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.pocket_road_ui.ui.screens.cardex.CarMock
-import com.example.pocket_road_ui.ui.screens.cardex.mockCars
+import com.example.pocket_road_ui.domain.enums.CarRarity
+import com.example.pocket_road_ui.domain.models.Car
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
-fun CarCard(car: CarMock, onClick: (carId: Int) -> Unit) {
-    val borderColor = if (car.unlocked) AppColors.Gray700 else AppColors.Gray800
+fun CarCard(car: Car, onClick: (carId: String) -> Unit) {
 
     Box(
         modifier = Modifier
-            .aspectRatio(0.8f) // Proporção 4:5
+            .aspectRatio(0.8f)
             .clip(RoundedCornerShape(16.dp))
             .background(AppColors.Gray900)
-            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
-            .clickable(enabled = car.unlocked) {
+            .border(1.dp, AppColors.Gray800, RoundedCornerShape(16.dp))
+            .clickable(enabled = true) {
                 onClick(car.id)
             }
         ) {
-        // Imagem de Fundo
+
         Image(
-            painter = rememberAsyncImagePainter(car.imageUrl),
-            contentDescription = car.name,
+            painter = rememberAsyncImagePainter(car.photoPath),
+            contentDescription = car.model,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-                .then(
-                    if (!car.unlocked) Modifier.blur(4.dp) else Modifier
-                )
-                .then(
-                    if (!car.unlocked) Modifier.run {
-                        // Simula Grayscale com ColorFilter se necessário, ou usar alpha
-                        // aqui usarei alpha para simplificar
-                        this // Compose nao tem grayscale modifier nativo facil sem colorFilter
-                    } else Modifier
-                ),
-            alpha = if (car.unlocked) 1f else 0.4f
+            modifier = Modifier.fillMaxSize(),
+            alpha = 0.4f
         )
 
-        // Gradiente Overlay (para ler o texto)
+        // gradient overlay (so you can read the text)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,47 +73,23 @@ fun CarCard(car: CarMock, onClick: (carId: Int) -> Unit) {
                 )
         )
 
-        // Conteúdo
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(12.dp)
         ) {
-            if (car.unlocked) {
-                RarityBadge(car.rarity)
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = car.name,
-                    style = AppTypography.ScreenTitle.copy(fontSize = 14.sp),
-                    maxLines = 1
-                )
-                Text(
-                    text = car.brand,
-                    style = AppTypography.Tagline.copy(fontSize = 10.sp)
-                )
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "Locked",
-                        tint = AppColors.Gray400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "DESCONHECIDO",
-                        style = AppTypography.Tagline.copy(
-                            fontSize = 10.sp,
-                            fontFamily = FontFamily.Monospace
-                        )
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    RarityBadge(car.rarity)
-                }
-            }
+
+            RarityBadge(car.rarity.label)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = car.model,
+                style = AppTypography.ScreenTitle.copy(fontSize = 14.sp),
+                maxLines = 1
+            )
+            Text(
+                text = car.brand,
+                style = AppTypography.Tagline.copy(fontSize = 10.sp)
+            )
         }
     }
 }
@@ -132,5 +97,13 @@ fun CarCard(car: CarMock, onClick: (carId: Int) -> Unit) {
 @Preview
 @Composable
 fun CarCardPreview() {
-    CarCard(mockCars[0], onClick = {})
+    val car = Car(
+        "abuble",
+        "Ka",
+        "Ford",
+        CarRarity.REGULAR,
+        "https://ckecu.com/wp-content/uploads/2022/03/Ford-Ka-800x620.jpg"
+    )
+
+    CarCard(car, onClick = {})
 }

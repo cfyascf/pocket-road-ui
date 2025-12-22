@@ -21,26 +21,30 @@ import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
-fun StatsRow() {
+fun StatsRow(
+    capturedCount: String,
+    garageValue: String,
+    ranking: String
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         StatCard(
             label = "Capturados",
-            value = "42",
+            value = capturedCount,
             valueColor = Color.White,
             modifier = Modifier.weight(1f)
         )
         StatCard(
-            label = "Valor Garage",
-            value = "2.4M",
-            valueColor = Color(0xFF10B981), // Green-500
+            label = "Valor Garagem",
+            value = garageValue,
+            valueColor = Color(0xFF10B981),
             modifier = Modifier.weight(1f)
         )
         StatCard(
             label = "Ranking",
-            value = "#840",
+            value = ranking,
             valueColor = AppColors.Red500,
             modifier = Modifier.weight(1f)
         )

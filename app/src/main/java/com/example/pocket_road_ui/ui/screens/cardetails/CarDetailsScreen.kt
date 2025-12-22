@@ -29,16 +29,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.pocket_road_ui.domain.enums.CarRarity
+import com.example.pocket_road_ui.domain.models.Car
 import com.example.pocket_road_ui.ui.screens.cardetails.components.PaddingBox
 import com.example.pocket_road_ui.ui.screens.cardetails.components.SpecRow
 import com.example.pocket_road_ui.ui.screens.cardetails.components.StatGridItem
-import com.example.pocket_road_ui.ui.screens.cardex.CarMock
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
 fun CarDetailScreen(
-    car: CarMock,
+    car: Car,
     onClose: () -> Unit
 ) {
     Box(
@@ -53,8 +54,8 @@ fun CarDetailScreen(
                 .height(350.dp)
         ) {
             Image(
-                painter = rememberAsyncImagePainter(car.imageUrl),
-                contentDescription = car.name,
+                painter = rememberAsyncImagePainter(car.photoPath),
+                contentDescription = car.model,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -134,14 +135,14 @@ fun CarDetailScreen(
                             )
                         )
                         Text(
-                            text = car.name,
+                            text = car.model,
                             style = AppTypography.ScreenTitle.copy(
                                 fontSize = 32.sp,
                                 lineHeight = 36.sp
                             )
                         )
                     }
-                    RarityBadge(rarity = car.rarity)
+                    RarityBadge(rarity = car.rarity.label)
                 }
             }
 
@@ -246,13 +247,12 @@ fun CarDetailScreen(
 @Preview
 @Composable
 fun CarDetailPreview() {
-    val mockCar = CarMock(
-        id = 2,
-        name = "911 GT3 RS",
+    val mockCar = Car(
+        id = "2",
+        model = "911 GT3 RS",
         brand = "Porsche",
-        rarity = "lendario",
-        unlocked = true,
-        imageUrl = "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e"
+        rarity = CarRarity.LEGENDARY,
+        photoPath = "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e"
     )
 
     CarDetailScreen(car = mockCar, onClose = {})
