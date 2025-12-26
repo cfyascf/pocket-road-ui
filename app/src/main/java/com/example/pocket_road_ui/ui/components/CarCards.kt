@@ -79,7 +79,7 @@ fun CarCard(car: Car, onClick: (carId: String) -> Unit) {
                 .padding(12.dp)
         ) {
 
-            RarityBadge(car.rarity.label)
+            RarityBadge(car.rarity)
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = car.model,
@@ -101,7 +101,7 @@ fun CarCardPreview() {
         "abuble",
         "Ka",
         "Ford",
-        CarRarity.REGULAR,
+        CarRarity.COMMON,
         "https://ckecu.com/wp-content/uploads/2022/03/Ford-Ka-800x620.jpg"
     )
 

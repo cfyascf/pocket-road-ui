@@ -38,7 +38,7 @@ import com.example.pocket_road_ui.ui.theme.AppTypography
 val mockCars = listOf<Car>(
     Car("1", "Civic Type R", "Honda", CarRarity.RARE, "https://images"),
     Car("2", "911 GT3 RS", "Porsche", CarRarity.LEGENDARY, "https://images"),
-    Car("3", "Huracán Evo", "Lamborghini", CarRarity.EXOTIC, "https://images"),
+    Car("3", "Huracán Evo", "Lamborghini", CarRarity.UNCOMMON, "https://images"),
     Car("4", "Mustang Mach 1", "Ford", CarRarity.RARE, "https://images"),
     Car("5", "M4 Competition", "BMW", CarRarity.RARE, "https://images"),
 )

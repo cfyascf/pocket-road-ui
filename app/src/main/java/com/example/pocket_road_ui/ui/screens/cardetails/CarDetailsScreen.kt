@@ -34,10 +34,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.example.pocket_road_ui.domain.enums.CarRarity
 import com.example.pocket_road_ui.domain.models.Car
+import com.example.pocket_road_ui.domain.models.CarDetails
 import com.example.pocket_road_ui.ui.screens.cardetails.components.PaddingBox
 import com.example.pocket_road_ui.ui.screens.cardetails.components.SpecRow
 import com.example.pocket_road_ui.ui.screens.cardetails.components.StatGridItem
 import com.example.pocket_road_ui.ui.theme.AppColors
+import com.example.pocket_road_ui.ui.theme.AppDimensions
 import com.example.pocket_road_ui.ui.theme.AppTypography
 import com.example.pocket_road_ui.util.toDisplay
 
@@ -46,7 +48,19 @@ fun CarDetailScreen(
     viewModel: CarDetailsViewModel = hiltViewModel(),
     onClose: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    CarDetailContent(
+        state = uiState,
+        onClose = onClose
+    )
+}
+
+@Composable
+fun CarDetailContent(
+    state: CarDetailsUiState,
+    onClose: () -> Unit
+) {
 
     Box(
         modifier = Modifier
@@ -64,7 +78,7 @@ fun CarDetailScreen(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            // Overlay Gradiente (para transição suave para o preto)
+            // gradient overlay
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -80,7 +94,7 @@ fun CarDetailScreen(
             )
         }
 
-        // 2. Botões de Ação do Topo
+        // action buttons
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -116,11 +130,11 @@ fun CarDetailScreen(
             }
         }
 
-        // 3. Conteúdo Rolável
+        // scrolling content
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 280.dp) // Começa um pouco antes da imagem acabar
+                .padding(top = 280.dp)
                 .verticalScroll(rememberScrollState())
         ) {
             // Título e Raridade
@@ -147,7 +161,7 @@ fun CarDetailScreen(
                             )
                         )
                     }
-                    RarityBadge(rarity = state.carDetails?.rarity?.label.toDisplay())
+                    RarityBadge(rarity = state.carDetails?.rarity ?: CarRarity.UNKNOWN)
                 }
             }
 
@@ -160,14 +174,14 @@ fun CarDetailScreen(
                         StatGridItem(
                             icon = Icons.Default.ElectricBolt,
                             label = "POTÊNCIA",
-                            value = state.carDetails?.horsepower.toDisplay(),
+                            value = state.carDetails?.horsepower.toDisplay("cv"),
                             color = Color(0xFFEAB308), // Amarelo
                             modifier = Modifier.weight(1f)
                         )
                         StatGridItem(
                             icon = Icons.Default.Speed,
                             label = "0-100 KM/H",
-                            value = state.carDetails?.zeroToHundred.toDisplay(),
+                            value = state.carDetails?.zeroToHundred.toDisplay("s"),
                             color = Color(0xFF3B82F6), // Azul
                             modifier = Modifier.weight(1f)
                         )
@@ -176,7 +190,7 @@ fun CarDetailScreen(
                         StatGridItem(
                             icon = Icons.Default.BarChart,
                             label = "TORQUE",
-                            value = state.carDetails?.torque.toDisplay(),
+                            value = state.carDetails?.torque.toDisplay("kgfm"),
                             color = Color(0xFFEF4444), // Vermelho
                             modifier = Modifier.weight(1f)
                         )
@@ -228,7 +242,7 @@ fun CarDetailScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(AppDimensions.statusBarTopPadding + 32.dp))
         }
     }
 }
@@ -236,13 +250,28 @@ fun CarDetailScreen(
 @Preview
 @Composable
 fun CarDetailPreview() {
-    val mockCar = Car(
-        id = "2",
-        model = "911 GT3 RS",
-        brand = "Porsche",
-        rarity = CarRarity.LEGENDARY,
-        photoPath = "https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e"
+    val mockState = CarDetailsUiState(
+        false, null, CarDetails(
+            "DS3",
+            "Citroen",
+            CarRarity.UNCOMMON,
+            "https://tse4.mm.bing.net/th/id/OIP.kIUXDA2p-jigxjO98JypcAHaE7?rs=1&pid=ImgDetMain&o=7&rm=3",
+            "Turbo",
+            10.0,
+            4,
+            "SWD",
+            "1600",
+            "Front",
+            14.0,
+            165,
+            "Combustion",
+            65000.0,
+            213.0,
+            24.0,
+            6.8,
+            "1.6 L4"
+        )
     )
 
-    CarDetailScreen(onClose = {})
+    CarDetailContent(state = mockState, onClose = {})
 }

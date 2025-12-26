@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.*
@@ -228,7 +229,7 @@ fun LogoutButton(onClick: () -> Unit) {
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF7F1D1D).copy(alpha = 0.5f)), // Red-900
         shape = RoundedCornerShape(12.dp)
     ) {
-        Icon(imageVector = Icons.Default.Logout, contentDescription = null)
+        Icon(imageVector = Icons.AutoMirrored.Filled.Logout, contentDescription = null)
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = "Sair da Conta",

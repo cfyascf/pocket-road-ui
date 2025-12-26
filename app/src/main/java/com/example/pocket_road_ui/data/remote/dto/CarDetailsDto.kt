@@ -1,6 +1,6 @@
 package com.example.pocket_road_ui.data.remote.dto
 
-import com.example.pocket_road_ui.domain.enums.CarRarity
+import com.google.gson.annotations.SerializedName
 
 data class CarDetailsDto(
     val model: String,

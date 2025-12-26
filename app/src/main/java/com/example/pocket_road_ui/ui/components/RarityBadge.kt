@@ -13,22 +13,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pocket_road_ui.domain.enums.CarRarity
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
-fun RarityBadge(rarity: String) {
-    val (bgColor, textColor) = when (rarity.lowercase()) {
-        "comum" -> Pair(AppColors.Gray700, Color.White)
-        "incomum" -> Pair(Color(0xFF22C55E), Color.White) // Green-500
-        "raro" -> Pair(Color(0xFF3B82F6), Color.White) // Blue-500
-        "exotico" -> Pair(Color(0xFFA855F7), Color.White) // Purple-500
-        "lendario" -> Pair(Color(0xFFEAB308), Color.Black) // Yellow-500
-        else -> Pair(AppColors.Gray700, Color.White)
-    }
+fun RarityBadge(rarity: CarRarity) {
 
     Surface(
-        color = bgColor,
+        color = Color(rarity.colorHex),
         shape = RoundedCornerShape(4.dp),
         modifier = Modifier.height(16.dp)
     ) {
@@ -37,10 +30,10 @@ fun RarityBadge(rarity: String) {
             modifier = Modifier.padding(horizontal = 6.dp)
         ) {
             Text(
-                text = rarity.uppercase(),
+                text = rarity.label.uppercase(),
                 style = AppTypography.Tagline.copy(
                     fontSize = 8.sp,
-                    color = textColor,
+                    color = Color(0xFFFFFFFF),
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.5.sp
                 )
