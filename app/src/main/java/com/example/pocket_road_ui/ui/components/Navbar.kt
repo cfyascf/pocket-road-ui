@@ -37,10 +37,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pocket_road_ui.domain.enums.AppTab
 import com.example.pocket_road_ui.ui.theme.AppColors
 
 @Composable
 fun Navbar(
+    selectedTab: AppTab,
     onNavigateToCardexScreen: () -> Unit,
     onNavigateToCaptureScreen: () -> Unit,
     onNavigateToProfileScreen: () -> Unit
@@ -51,9 +53,9 @@ fun Navbar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp + bottomPadding)  // Altura para acomodar o botão flutuante
+            .height(80.dp + bottomPadding)
     ) {
-        // Fundo da Barra (Vidro/Blur)
+        // translucent background
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -69,32 +71,32 @@ fun Navbar(
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Botão Esquerda
+                // left button
                 NavIcon(
                     icon = Icons.Default.DirectionsCar,
                     label = "Garagem",
-                    isSelected = true,
+                    isSelected = selectedTab == AppTab.CARDEX,
                     onClick = { onNavigateToCardexScreen() }
                 )
 
-                // Espaço para o botão central
+                // space for center button
                 Spacer(modifier = Modifier.width(48.dp))
 
-                // Botão Direita
+                // right button
                 NavIcon(
                     icon = Icons.Default.Person,
                     label = "Perfil",
-                    isSelected = false,
+                    isSelected = selectedTab == AppTab.PROFILE,
                     onClick = { onNavigateToProfileScreen() }
                 )
             }
         }
 
-        // Botão Central Flutuante (Scanner)
+        // floating button (camera)
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = (-10).dp) // Sobe um pouco pra fora da barra
+                .offset(y = (-10).dp) // goes up from the bar
         ) {
             FloatingActionButton(
                 onClick = { onNavigateToCaptureScreen() },
@@ -143,6 +145,7 @@ fun NavIcon(icon: ImageVector, label: String, isSelected: Boolean, onClick: () -
 @Composable
 fun NavbarPreview() {
     Navbar(
+        selectedTab = AppTab.CARDEX,
         onNavigateToCardexScreen = {},
         onNavigateToCaptureScreen = {},
         onNavigateToProfileScreen = {})

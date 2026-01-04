@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,6 +31,7 @@ import com.example.pocket_road_ui.ui.components.PopupNotification
 import com.example.pocket_road_ui.ui.components.Title
 import com.example.pocket_road_ui.ui.components.form.Form
 import com.example.pocket_road_ui.ui.components.form.InputData
+import com.example.pocket_road_ui.ui.screens.login.LoginSideEffect
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppDimensions
 
@@ -39,6 +41,18 @@ fun LoginScreen(
     onNavigateToCardexScreen: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.sideEffects.collect { effect ->
+            when (effect) {
+                is LoginSideEffect.NavigateToHome -> {
+                    onNavigateToCardexScreen()
+                }
+
+                LoginSideEffect.NavigateToHome -> TODO()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize().background(AppColors.Gray950)
@@ -79,7 +93,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            val fields = mutableListOf<InputData>(
+            val fields = mutableListOf(
                 InputData(
                     state.username,
                     { viewModel.onUsernameChange(it) },
@@ -121,9 +135,9 @@ fun LoginScreen(
                 buttonText = if (state.isRegistering) "Cadastrar" else "Entrar",
                 buttonAction = {
                     if (state.isRegistering)
-                        viewModel.onRegisterClick(onNavigateToCardexScreen)
+                        viewModel.onRegisterClick()
                     else
-                        viewModel.onLoginClick(onNavigateToCardexScreen)
+                        viewModel.onLoginClick()
                 },
                 isLoading = state.isLoading
             )
@@ -184,8 +198,10 @@ fun LoginScreen(
 @Composable
 fun LoginScreenPreview() {
     val fakeRepo = AuthRepositoryMock()
-    val fakeVM = LoginViewModel(fakeRepo, SessionManager(
-        context = TODO()
+    val fakeVM = LoginViewModel(
+        fakeRepo,
+        SessionManager(
+            context = LocalContext.current
     ))
 
     LoginScreen(fakeVM, onNavigateToCardexScreen = {})

@@ -1,7 +1,6 @@
 package com.example.pocket_road_ui.domain.mapper
 
 import com.example.pocket_road_ui.data.remote.dto.CarDetailsDto
-import com.example.pocket_road_ui.domain.enums.CarRarity
 import com.example.pocket_road_ui.domain.enums.toCarRarityEnum
 import com.example.pocket_road_ui.domain.models.CarDetails
 
@@ -12,7 +11,7 @@ fun CarDetailsDto.toEntity(): CarDetails {
         brand = this.brand,
         model = this.model,
         rarity = carRarity,
-        photoPath = this.photoPath,
+        photoPath = this.photoPath ?: "BuildConfig.DEFAULT_CAR_PHOTO_PATH",
         aspiration = this.aspiration,
         cityFuelEconomy = this.cityFuelEconomy,
         cylinders = this.cylinders,

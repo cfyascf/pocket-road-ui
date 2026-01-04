@@ -4,11 +4,11 @@ import androidx.navigation.NavController
 
 fun NavController.navigateSingleTopTo(route: String) {
     this.navigate(route) {
-        // Evita cópias na pilha
+        // avoids copies in queue
         launchSingleTop = true
-        // Restaura o estado (scroll, inputs) se você já esteve nessa aba antes
+        // restore the ui state if the user has already been there
         restoreState = true
-        // Limpa a pilha para evitar que o botão "Voltar" fique passeando entre abas
+        // cleans the stack to avoid getting back on back button clicked
         popUpTo(this@navigateSingleTopTo.graph.startDestinationId) {
             saveState = true
         }

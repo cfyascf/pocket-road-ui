@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 data class UserCardexDto (
     @SerializedName("total_price")
-    val garageValue: String,
+    val garageValue: Double,
 
     @SerializedName("quantity")
-    val capturedCount: String,
+    val capturedCount: Int,
 
     @SerializedName("ranking")
     val ranking: String,

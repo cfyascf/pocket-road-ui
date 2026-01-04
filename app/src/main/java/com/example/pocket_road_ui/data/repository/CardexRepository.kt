@@ -5,6 +5,7 @@ import com.example.pocket_road_ui.data.remote.api.CardexApi
 import com.example.pocket_road_ui.data.remote.dto.ApiResponse
 import com.example.pocket_road_ui.data.remote.dto.CarDto
 import com.example.pocket_road_ui.data.remote.dto.CarDetailsDto
+import com.example.pocket_road_ui.data.remote.dto.RegisterCarRequest
 import com.example.pocket_road_ui.data.remote.dto.UserCardexDto
 import jakarta.inject.Inject
 
@@ -28,14 +29,23 @@ open class CardexRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun registerCar(registerCarRequest: RegisterCarRequest): Result<ApiResponse<Unit>> {
+        return try {
+            val response = api.registerCar(registerCarRequest)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 open class CardexRepositoryMock() : ICardexRepository {
 
     override suspend fun getCardex(userId: String): Result<ApiResponse<UserCardexDto?>> {
         val userCardexDto = UserCardexDto(
-            garageValue = "100000.0",
-            capturedCount = "5",
+            garageValue = 100000.0,
+            capturedCount = 5,
             ranking = "1",
             cars = listOf(
                 CarDto(
@@ -59,6 +69,10 @@ open class CardexRepositoryMock() : ICardexRepository {
     }
 
     override suspend fun getCarDetails(carId: String): Result<ApiResponse<CarDetailsDto?>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun registerCar(registerCarRequest: RegisterCarRequest): Result<ApiResponse<Unit>> {
         TODO("Not yet implemented")
     }
 }

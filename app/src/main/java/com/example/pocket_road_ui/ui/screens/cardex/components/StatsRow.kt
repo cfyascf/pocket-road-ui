@@ -17,13 +17,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.pocket_road_ui.ui.extensions.toAbbreviatedString
+import com.example.pocket_road_ui.ui.extensions.toDisplay
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 @Composable
 fun StatsRow(
-    capturedCount: String,
-    garageValue: String,
+    capturedCount: Int,
+    garageValue: Double,
     ranking: String
 ) {
     Row(
@@ -31,20 +33,20 @@ fun StatsRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         StatCard(
-            label = "Capturados",
-            value = capturedCount,
+            label = "Captured",
+            value = capturedCount.toDisplay(),
             valueColor = Color.White,
             modifier = Modifier.weight(1f)
         )
         StatCard(
-            label = "Valor Garagem",
-            value = garageValue,
+            label = "Garage Value",
+            value = garageValue.toAbbreviatedString(),
             valueColor = Color(0xFF10B981),
             modifier = Modifier.weight(1f)
         )
         StatCard(
             label = "Ranking",
-            value = ranking,
+            value = ranking.toDisplay(),
             valueColor = AppColors.Red500,
             modifier = Modifier.weight(1f)
         )

@@ -15,6 +15,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.pocket_road_ui.domain.enums.AppTab
+import com.example.pocket_road_ui.domain.enums.CarRarity
+import com.example.pocket_road_ui.domain.models.Car
+import com.example.pocket_road_ui.domain.models.CardexKpis
 import com.example.pocket_road_ui.ui.components.CarCard
 import com.example.pocket_road_ui.ui.components.Navbar
 import com.example.pocket_road_ui.ui.screens.cardex.components.CardexHeader
@@ -28,17 +32,50 @@ fun CardexScreen(
     onNavigateToCarDetail: (carId: String) -> Unit,
     onNavigateToCardexScreen: () -> Unit,
     onNavigateToCaptureScreen: () -> Unit,
-    onNavigateToProfileScreen: () -> Unit)
-{
+    onNavigateToProfileScreen: () -> Unit,
+    onNavigateToLoginScreen: () -> Unit,
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.sideEffects.collect { effect ->
+            when (effect) {
+                is CardexSideEffect.NavigateToCarDetails -> onNavigateToCarDetail(effect.carId)
+                is CardexSideEffect.NavigateToLogin -> onNavigateToLoginScreen()
+            }
+        }
+    }
+
+    CardexScreenContent(
+        state = state,
+        onCarClicked = viewModel::onCarClicked,
+        onSortClicked = { /* TODO: viewModel.onSortClicked() */ },
+        onNavigateToCardexScreen = onNavigateToCardexScreen,
+        onNavigateToCaptureScreen = onNavigateToCaptureScreen,
+        onNavigateToProfileScreen = onNavigateToProfileScreen
+    )
+}
+
+@Composable
+fun CardexScreenContent(
+    state: CardexUiState,
+    onCarClicked: (String) -> Unit,
+    onSortClicked: () -> Unit,
+    onNavigateToCardexScreen: () -> Unit,
+    onNavigateToCaptureScreen: () -> Unit,
+    onNavigateToProfileScreen: () -> Unit,
+) {
     Scaffold(
         containerColor = AppColors.Gray950,
         topBar = { CardexHeader() },
-        bottomBar = { Navbar(
-            { onNavigateToCardexScreen() },
-            { onNavigateToCaptureScreen() },
-            {onNavigateToProfileScreen() }) }
+        bottomBar = {
+            Navbar(
+                selectedTab = AppTab.CARDEX,
+                onNavigateToCardexScreen = onNavigateToCardexScreen,
+                onNavigateToCaptureScreen = onNavigateToCaptureScreen,
+                onNavigateToProfileScreen = onNavigateToProfileScreen
+            )
+        }
     ) { paddingValues ->
 
         Column(
@@ -51,9 +88,9 @@ fun CardexScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             StatsRow(
-                state.kpis.capturedCount,
-                state.kpis.garageValue,
-                state.kpis.ranking
+                capturedCount = state.kpis.capturedCount,
+                garageValue = state.kpis.garageValue,
+                ranking = state.kpis.ranking
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -73,7 +110,7 @@ fun CardexScreen(
                         color = AppColors.Red500,
                         fontWeight = FontWeight.Bold
                     ),
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable(onClick = onSortClicked)
                 )
             }
 
@@ -86,7 +123,7 @@ fun CardexScreen(
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(state.cars) { car ->
-                    CarCard(car) { onNavigateToCarDetail(car.id) }
+                    CarCard(car) { onCarClicked(car.id) }
                 }
             }
         }
@@ -96,9 +133,30 @@ fun CardexScreen(
 @Preview
 @Composable
 fun CardexScreenPreview() {
-    CardexScreen(
-        onNavigateToCarDetail = {},
+    val fakeKpis = CardexKpis(
+        capturedCount = 12,
+        garageValue = 1250000.0,
+        ranking = "#42"
+    )
+
+    val fakeCars = listOf(
+        Car("1", "Fusca", "Chevrolet", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
+        Car("2", "Kombi", "Volkswagen", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
+        Car("3", "Brasilia", "Volkswagen", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
+        Car("4", "Opala", "Chevrolet", CarRarity.RARE, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg")
+    )
+
+    val fakeState = CardexUiState(
+        kpis = fakeKpis,
+        cars = fakeCars
+    )
+
+    CardexScreenContent(
+        state = fakeState,
+        onCarClicked = {},
+        onSortClicked = {},
         onNavigateToCardexScreen = {},
         onNavigateToCaptureScreen = {},
-        onNavigateToProfileScreen = {})
+        onNavigateToProfileScreen = {}
+    )
 }

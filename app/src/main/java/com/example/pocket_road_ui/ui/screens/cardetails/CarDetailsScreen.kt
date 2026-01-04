@@ -33,15 +33,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.example.pocket_road_ui.domain.enums.CarRarity
-import com.example.pocket_road_ui.domain.models.Car
 import com.example.pocket_road_ui.domain.models.CarDetails
+import com.example.pocket_road_ui.ui.extensions.toDisplay
 import com.example.pocket_road_ui.ui.screens.cardetails.components.PaddingBox
 import com.example.pocket_road_ui.ui.screens.cardetails.components.SpecRow
 import com.example.pocket_road_ui.ui.screens.cardetails.components.StatGridItem
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppDimensions
 import com.example.pocket_road_ui.ui.theme.AppTypography
-import com.example.pocket_road_ui.util.toDisplay
 
 @Composable
 fun CarDetailScreen(

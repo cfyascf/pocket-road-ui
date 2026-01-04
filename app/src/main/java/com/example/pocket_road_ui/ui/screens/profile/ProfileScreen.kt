@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.pocket_road_ui.R
+import com.example.pocket_road_ui.domain.enums.AppTab
 import com.example.pocket_road_ui.ui.components.UserProfileCard
 import com.example.pocket_road_ui.ui.components.Navbar
 import com.example.pocket_road_ui.ui.theme.AppColors
@@ -58,6 +59,7 @@ fun ProfileScreen(
     Scaffold(
         containerColor = AppColors.Gray950,
         bottomBar = { Navbar(
+            AppTab.PROFILE,
             { onNavigateToCardexScreen() },
             { onNavigateToCaptureScreen() },
             {onNavigateToProfileScreen() }) }
