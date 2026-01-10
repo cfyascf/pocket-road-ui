@@ -6,6 +6,7 @@ data class Car(
     val id: String,
     val model: String,
     val brand: String,
+    val year: String,
     val rarity: CarRarity,
     val photoPath: String
 )

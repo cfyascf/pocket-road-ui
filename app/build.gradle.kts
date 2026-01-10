@@ -35,6 +35,9 @@ android {
 
         val apiUrl = localProperties.getProperty("API_BASE_URL") ?: "\"http://localhost:5000/\""
         buildConfigField("String", "API_BASE_URL", apiUrl)
+
+        val defaultCarImageUrl = localProperties.getProperty("DEFAULT_CAR_PHOTO_PATH") ?: "https://autodex-static.s3.amazonaws.com/images/mysterious.jpeg"
+        buildConfigField("String", "DEFAULT_CAR_PHOTO_PATH", defaultCarImageUrl)
     }
 
     buildTypes {
@@ -70,6 +73,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.compose.foundation)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

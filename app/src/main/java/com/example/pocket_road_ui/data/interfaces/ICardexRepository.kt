@@ -8,5 +8,5 @@ import com.example.pocket_road_ui.data.remote.dto.UserCardexDto
 interface ICardexRepository {
     suspend fun getCardex(userId: String): Result<ApiResponse<UserCardexDto?>>
     suspend fun getCarDetails(carId: String): Result<ApiResponse<CarDetailsDto?>>
-    suspend fun registerCar(registerCarRequest: RegisterCarRequest): Result<ApiResponse<Unit>>
+    suspend fun registerCar(request: RegisterCarRequest): Result<ApiResponse<Unit>>
 }

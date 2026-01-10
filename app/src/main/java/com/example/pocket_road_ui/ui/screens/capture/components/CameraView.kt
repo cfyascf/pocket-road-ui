@@ -1,20 +1,27 @@
-package com.example.pocket_road_ui.ui.screens.capture.views
+package com.example.pocket_road_ui.ui.screens.capture.components
 
+import android.content.pm.PackageManager
 import android.view.ViewGroup
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -29,12 +36,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.example.pocket_road_ui.ui.screens.capture.CaptureUiEvent
 import com.example.pocket_road_ui.ui.screens.capture.CaptureUiState
 import com.example.pocket_road_ui.ui.theme.AppDimensions
 import com.example.pocket_road_ui.utils.CameraUtils
+import java.io.File
 import java.util.concurrent.Executors
 
 @Composable
@@ -44,85 +53,160 @@ fun CameraView(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val isPreview = LocalInspectionMode.current // 1. Detect Preview Mode
+    val isPreview = LocalInspectionMode.current
 
-    // Only initialize executor if NOT in preview
     val cameraExecutor = remember(isPreview) {
         if (!isPreview) Executors.newSingleThreadExecutor() else null
     }
 
+    var cameraProvider: ProcessCameraProvider? by remember { mutableStateOf(null) }
+    var camera: Camera? by remember { mutableStateOf(null) }
+
+    // Store previewView to reuse in re-binding
+    var previewView: PreviewView? by remember { mutableStateOf(null) }
+    var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
+
+    var showSettings by remember { mutableStateOf(false) }
+
     DisposableEffect(Unit) {
         onDispose {
+            try { cameraProvider?.unbindAll() } catch (e: Exception) {}
             cameraExecutor?.shutdown()
         }
     }
 
-    var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
+    // Effect: Bind/Re-bind camera when Aspect Ratio or HDR changes
+    // This is the SINGLE SOURCE OF TRUTH for binding logic.
+    LaunchedEffect(state.aspectRatio, state.isHdrEnabled, cameraProvider, previewView) {
+        val provider = cameraProvider
+        val view = previewView
+        if (provider != null && view != null) {
+            try {
+                // Must unbind before rebinding with new settings
+                provider.unbindAll()
+
+                // Apply Aspect Ratio Strategy
+                val resolutionSelector = ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(AspectRatioStrategy(state.aspectRatio, AspectRatioStrategy.FALLBACK_RULE_AUTO))
+                    .build()
+
+                val preview = Preview.Builder()
+                    .setResolutionSelector(resolutionSelector)
+                    .build()
+                    .also { it.setSurfaceProvider(view.surfaceProvider) }
+
+                // Configure HDR (Quality) vs Speed
+                val captureMode = if (state.isHdrEnabled)
+                    ImageCapture.CAPTURE_MODE_MAXIMIZE_QUALITY
+                else
+                    ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
+
+                val newImageCapture = ImageCapture.Builder()
+                    .setResolutionSelector(resolutionSelector)
+                    .setCaptureMode(captureMode)
+                    .build()
+
+                imageCapture = newImageCapture // Update reference for Shutter Button
+
+                val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+                camera = provider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, newImageCapture)
+            } catch (e: Exception) { e.printStackTrace() }
+        }
+    }
+
+    // Effect: Update Exposure when slider changes
+    LaunchedEffect(state.exposureValue, camera) {
+        camera?.let { cam ->
+            val exposureState = cam.cameraInfo.exposureState
+            if (exposureState.isExposureCompensationSupported) {
+                val range = exposureState.exposureCompensationRange
+                val step = exposureState.exposureCompensationStep.toFloat()
+                val targetIndex = (state.exposureValue / step).toInt()
+                val clampedIndex = targetIndex.coerceIn(range.lower, range.upper)
+                cam.cameraControl.setExposureCompensationIndex(clampedIndex)
+            }
+        }
+    }
+
+    // Effect: Toggle Flash (Torch Mode)
+    LaunchedEffect(state.isFlashOn, camera) {
+        camera?.let { cam ->
+            if (cam.cameraInfo.hasFlashUnit()) {
+                try {
+                    cam.cameraControl.enableTorch(state.isFlashOn)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    val hasCameraHardware = remember(context) {
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
 
-        // 2. Conditional Rendering
-        if (isPreview) {
-            // Placeholder for Preview Mode (Prevents crash)
+        if (isPreview || !hasCameraHardware) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.DarkGray),
+                modifier = Modifier.fillMaxSize().background(Color.DarkGray),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Camera Preview Area", color = Color.White)
+                Text("Camera Preview", color = Color.White)
             }
         } else {
-            // Real Camera for Device
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { ctx ->
-                    val previewView = PreviewView(ctx).apply {
+                    val view = PreviewView(ctx).apply {
                         scaleType = PreviewView.ScaleType.FILL_CENTER
+                        implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                         layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT
                         )
                     }
+                    previewView = view // Save reference
 
-                    // Use applicationContext for API 34+ compatibility
-                    val cameraProviderFuture = androidx.camera.lifecycle.ProcessCameraProvider.getInstance(ctx.applicationContext)
+                    val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx.applicationContext)
                     cameraProviderFuture.addListener({
-                        val cameraProvider = cameraProviderFuture.get()
-                        val preview = Preview.Builder().build().also {
-                            it.setSurfaceProvider(previewView.surfaceProvider)
-                        }
-                        imageCapture = ImageCapture.Builder().build()
-                        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
                         try {
-                            cameraProvider.unbindAll()
-                            cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageCapture)
-                        } catch (exc: Exception) { /* Handle error */ }
+                            cameraProvider = cameraProviderFuture.get()
+                            // Note: We DO NOT bind here anymore.
+                            // Setting 'cameraProvider' will trigger the LaunchedEffect above.
+                        } catch (exc: Exception) { exc.printStackTrace() }
                     }, androidx.core.content.ContextCompat.getMainExecutor(ctx))
-                    previewView
+                    view
                 }
             )
         }
 
-        // 3. Grid Overlay (Visible in both)
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val width = size.width
-            val height = size.height
-            val color = Color.White.copy(alpha = 0.2f)
-            val strokeWidth = 1.dp.toPx()
+        // Grid Overlay (Toggles visibility based on state)
+        if (state.isGridEnabled) {
+            Canvas(modifier = Modifier.fillMaxSize().zIndex(1f)) {
+                val width = size.width
+                val height = size.height
+                val color = Color.White.copy(alpha = 0.5f)
+                val strokeWidth = 1.dp.toPx()
 
-            drawLine(color, Offset(width / 3, 0f), Offset(width / 3, height), strokeWidth)
-            drawLine(color, Offset(2 * width / 3, 0f), Offset(2 * width / 3, height), strokeWidth)
-            drawLine(color, Offset(0f, height / 3), Offset(width, height / 3), strokeWidth)
-            drawLine(color, Offset(0f, 2 * height / 3), Offset(width, 2 * height / 3), strokeWidth)
+                drawLine(color, Offset(width / 3, 0f), Offset(width / 3, height), strokeWidth)
+                drawLine(color, Offset(2 * width / 3, 0f), Offset(2 * width / 3, height), strokeWidth)
+                drawLine(color, Offset(0f, height / 3), Offset(width, height / 3), strokeWidth)
+                drawLine(color, Offset(0f, 2 * height / 3), Offset(width, 2 * height / 3), strokeWidth)
+            }
         }
 
-        // 4. UI Overlay (Visible in both)
+        // UI Overlay
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = AppDimensions.statusBarTopPadding + 48.dp, bottom = AppDimensions.navBarBottomPadding + 32.dp, start = 24.dp, end = 24.dp),
+                .padding(
+                    top = AppDimensions.statusBarTopPadding + 48.dp,
+                    bottom = AppDimensions.navBarBottomPadding + 32.dp,
+                    start = 24.dp,
+                    end = 24.dp
+                )
+                .zIndex(2f),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             // Top Bar
@@ -136,12 +220,19 @@ fun CameraView(
                     modifier = Modifier
                         .size(40.dp)
                         .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
                 ) {
-                    Icon(
-                        imageVector = if (state.isFlashOn) Icons.Default.Bolt else Icons.Default.FlashOff,
-                        contentDescription = "Flash",
-                        tint = if (state.isFlashOn) Color(0xFFFACC15) else Color.White
-                    )
+                    AnimatedContent(
+                        targetState = state.isFlashOn,
+                        label = "Flash",
+                        transitionSpec = { scaleIn() togetherWith scaleOut() }
+                    ) { isOn ->
+                        Icon(
+                            imageVector = if (isOn) Icons.Default.Bolt else Icons.Default.FlashOff,
+                            contentDescription = "Flash",
+                            tint = if (isOn) Color(0xFFFACC15) else Color.White
+                        )
+                    }
                 }
 
                 Box(
@@ -158,10 +249,11 @@ fun CameraView(
                 }
 
                 IconButton(
-                    onClick = { /* Settings */ },
+                    onClick = { showSettings = true },
                     modifier = Modifier
                         .size(40.dp)
                         .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
@@ -177,6 +269,7 @@ fun CameraView(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
+                // Gallery Thumbnail
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -194,57 +287,28 @@ fun CameraView(
                     }
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .border(4.dp, Color.White, CircleShape)
-                        .clickable {
-                            if (!isPreview) {
-                                val outputDir = CameraUtils.getOutputDirectory(context)
-                                imageCapture?.let { capture ->
-                                    cameraExecutor?.let { executor ->
-                                        CameraUtils.takePhoto(capture, outputDir, executor,
-                                            onImageCaptured = { uri -> onEvent(CaptureUiEvent.OnPhotoCaptured(uri)) },
-                                            onError = { }
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(modifier = Modifier.size(64.dp).background(Color.White, CircleShape))
-                }
+                // Shutter
+                ShutterButton(
+                    imageCapture = imageCapture,
+                    executor = cameraExecutor,
+                    outputDirectory = CameraUtils.getOutputDirectory(context) ?: File(""),
+                    onPhotoCaptured = { uri -> onEvent(CaptureUiEvent.OnPhotoCaptured(uri)) }
+                )
 
-                val isEnabled = state.capturedPhotos.isNotEmpty()
-                IconButton(
-                    onClick = { onEvent(CaptureUiEvent.OnContinueToReview) },
-                    enabled = isEnabled,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            if (isEnabled) Color(0xFF10B981) else Color.Gray.copy(alpha = 0.5f),
-                            CircleShape
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Done",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                // Done
+                DoneButton(
+                    isEnabled = state.capturedPhotos.isNotEmpty(),
+                    onClick = { onEvent(CaptureUiEvent.OnContinueToReview) }
+                )
             }
         }
-    }
-}
 
-@androidx.compose.ui.tooling.preview.Preview
-@Composable
-fun CameraViewPreview() {
-    CameraView(
-        state = CaptureUiState(),
-        onEvent = {}
-    )
+        if (showSettings) {
+            CameraSettings(
+                state = state,
+                onEvent = onEvent,
+                onDismiss = { showSettings = false }
+            )
+        }
+    }
 }

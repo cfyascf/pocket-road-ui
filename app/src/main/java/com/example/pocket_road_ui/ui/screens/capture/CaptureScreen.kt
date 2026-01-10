@@ -1,6 +1,7 @@
 package com.example.pocket_road_ui.ui.screens.capture
 
 import android.Manifest
+import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -19,13 +20,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.pocket_road_ui.domain.enums.CaptureStep
 import com.example.pocket_road_ui.ui.screens.capture.components.FailureView
+import com.example.pocket_road_ui.ui.screens.capture.components.PermissionView
 import com.example.pocket_road_ui.ui.screens.capture.components.ProcessingView
 import com.example.pocket_road_ui.ui.screens.capture.components.ReviewFormView
-import com.example.pocket_road_ui.ui.screens.capture.views.CameraView
+import com.example.pocket_road_ui.ui.screens.capture.components.CameraView
+import com.example.pocket_road_ui.ui.screens.capture.components.SuccessView
 
 @Composable
 fun CaptureScreen(
@@ -33,6 +38,24 @@ fun CaptureScreen(
     onNavigateToCardex: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    // 2. Setup Permission Launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            hasCameraPermission = granted
+        }
+    )
 
     LaunchedEffect(Unit) {
         viewModel.sideEffects.collect { effect ->
@@ -43,27 +66,18 @@ fun CaptureScreen(
         }
     }
 
-    var hasCameraPermission by remember { mutableStateOf(false) }
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { hasCameraPermission = it }
-    )
-
-    LaunchedEffect(Unit) {
-        permissionLauncher.launch(Manifest.permission.CAMERA)
-    }
-
     if (!hasCameraPermission) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Camera permission required", color = Color.White)
-        }
-        return
+        PermissionView(
+            onRequestPermission = {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        )
+    } else {
+        CaptureContent(
+            state = state,
+            onEvent = viewModel::onEvent
+        )
     }
-
-    CaptureContent(
-        state = state,
-        onEvent = viewModel::onEvent
-    )
 }
 
 @Composable
@@ -83,6 +97,7 @@ fun CaptureContent(
                 CaptureStep.CAMERA -> CameraView(state = state, onEvent = onEvent)
                 CaptureStep.REVIEW_AND_HINTS -> ReviewFormView(state = state, onEvent = onEvent)
                 CaptureStep.PROCESSING -> ProcessingView(state = state)
+                CaptureStep.RESULT_SUCCESS -> SuccessView(state = state, onEvent = onEvent)
                 CaptureStep.RESULT_FAILURE -> FailureView(onEvent = onEvent)
             }
         }
@@ -93,11 +108,7 @@ fun CaptureContent(
 @Composable
 fun CaptureScreenPreview() {
     CaptureContent(
-        state = CaptureUiState(
-            currentStep = CaptureStep.CAMERA,
-            // You can fake other state here to test different looks
-            // capturedPhotos = listOf(Uri.EMPTY)
-        ),
+        state = CaptureUiState(),
         onEvent = {} // Empty lambda that does nothing
     )
 }
@@ -106,7 +117,7 @@ fun CaptureScreenPreview() {
 @Composable
 fun CaptureReviewPreview() {
     CaptureContent(
-        state = CaptureUiState(currentStep = CaptureStep.REVIEW_AND_HINTS),
+        state = CaptureUiState(),
         onEvent = {}
     )
 }

@@ -5,5 +5,6 @@ enum class CaptureStep {
     CAMERA,
     REVIEW_AND_HINTS,
     PROCESSING,
+    RESULT_SUCCESS, // Success redirects to Cardex, Failure shows a specific UI
     RESULT_FAILURE // Success redirects to Cardex, Failure shows a specific UI
 }

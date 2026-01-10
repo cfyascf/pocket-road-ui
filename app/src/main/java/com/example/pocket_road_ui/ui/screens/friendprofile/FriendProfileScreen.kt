@@ -36,11 +36,11 @@ import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
 val mockCars = listOf<Car>(
-    Car("1", "Civic Type R", "Honda", CarRarity.RARE, "https://images"),
-    Car("2", "911 GT3 RS", "Porsche", CarRarity.LEGENDARY, "https://images"),
-    Car("3", "Huracán Evo", "Lamborghini", CarRarity.UNCOMMON, "https://images"),
-    Car("4", "Mustang Mach 1", "Ford", CarRarity.RARE, "https://images"),
-    Car("5", "M4 Competition", "BMW", CarRarity.RARE, "https://images"),
+    Car("1", "Civic Type R", "Honda", "2020", CarRarity.RARE, "https://images"),
+    Car("2", "911 GT3 RS", "Porsche", "2020", CarRarity.LEGENDARY, "https://images"),
+    Car("3", "Huracán Evo", "Lamborghini", "2020", CarRarity.UNCOMMON, "https://images"),
+    Car("4", "Mustang Mach 1", "Ford", "2020", CarRarity.RARE, "https://images"),
+    Car("5", "M4 Competition", "BMW", "2020", CarRarity.RARE, "https://images"),
 )
 @Composable
 fun FriendProfileScreen(

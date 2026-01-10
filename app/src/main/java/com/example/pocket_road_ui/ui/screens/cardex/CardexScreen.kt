@@ -140,10 +140,10 @@ fun CardexScreenPreview() {
     )
 
     val fakeCars = listOf(
-        Car("1", "Fusca", "Chevrolet", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
-        Car("2", "Kombi", "Volkswagen", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
-        Car("3", "Brasilia", "Volkswagen", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
-        Car("4", "Opala", "Chevrolet", CarRarity.RARE, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg")
+        Car("1", "Fusca", "Chevrolet", "1985", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
+        Car("2", "Kombi", "Volkswagen", "1985", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
+        Car("3", "Brasilia", "Volkswagen", "1985", CarRarity.UNCOMMON, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg"),
+        Car("4", "Opala", "Chevrolet", "1985", CarRarity.RARE, "https://wallup.net/wp-content/uploads/2019/09/245378-2013-volkswagen-kombi-last-edition-bus-van.jpg")
     )
 
     val fakeState = CardexUiState(

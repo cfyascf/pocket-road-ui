@@ -7,14 +7,17 @@ data class CarDto(
     val id: String,
 
     @SerializedName("brand")
-    val carBrand: String,
+    val carBrand: String?,
 
     @SerializedName("model")
-    val carModel: String,
+    val carModel: String?,
 
     @SerializedName("rarity")
     val carRarity: String?,
 
+    @SerializedName("year")
+    val carYear: String?,
+
     @SerializedName("photo_path")
-    val photoPath: String
+    val photoPath: String?
 )

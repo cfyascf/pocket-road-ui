@@ -2,6 +2,7 @@ package com.example.pocket_road_ui.utils
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -53,9 +54,9 @@ object CameraUtils {
             }, ContextCompat.getMainExecutor(context))
         }
 
-    fun getOutputDirectory(context: Context): File {
-        val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
-            File(it, "PocketRoad").apply { mkdirs() }
+    fun getOutputDirectory(context: Context): File? {
+        val mediaDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)?.let {
+            File(it, "AutoDex").apply { mkdirs() }
         }
         return if (mediaDir != null && mediaDir.exists()) mediaDir else context.filesDir
     }

@@ -1,9 +1,16 @@
 package com.example.pocket_road_ui.ui.screens.capture
 
 import android.net.Uri
+import android.util.Log
+import androidx.compose.runtime.currentComposer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pocket_road_ui.data.interfaces.ICardexRepository
+import com.example.pocket_road_ui.data.remote.dto.RegisterCarRequest
 import com.example.pocket_road_ui.domain.enums.CaptureStep
+import com.example.pocket_road_ui.ui.screens.cardex.CardexViewModel
+import com.example.pocket_road_ui.utils.FileUtils.getFileFromUri
+import com.example.pocket_road_ui.utils.FileUtils.getRequestBodyFromString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -12,15 +19,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
-sealed interface CaptureSideEffect {
-    data object NavigateToCardex : CaptureSideEffect
-    data class ShowToast(val message: String) : CaptureSideEffect
-}
-
 @HiltViewModel
-class CaptureViewModel @Inject constructor() : ViewModel() {
+class CaptureViewModel @Inject constructor(
+    private val repository: ICardexRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CaptureUiState())
     val uiState = _uiState.asStateFlow()
@@ -32,14 +41,29 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
         when (event) {
             is CaptureUiEvent.OnPhotoCaptured -> onPhotoCaptured(event.uri)
             is CaptureUiEvent.OnRemovePhoto -> onRemovePhoto(event.uri)
-            CaptureUiEvent.OnToggleFlash -> toggleFlash()
-            CaptureUiEvent.OnContinueToReview -> onContinueToReview()
+            is CaptureUiEvent.OnToggleFlash -> toggleFlash()
+            is CaptureUiEvent.OnContinueToReview -> onContinueToReview()
             is CaptureUiEvent.OnBrandChanged -> _uiState.update { it.copy(hints = it.hints.copy(brand = event.value)) }
             is CaptureUiEvent.OnModelChanged -> _uiState.update { it.copy(hints = it.hints.copy(model = event.value)) }
             is CaptureUiEvent.OnYearChanged -> _uiState.update { it.copy(hints = it.hints.copy(year = event.value)) }
-            CaptureUiEvent.OnSubmitAnalysis -> onSubmitAnalysis()
-            CaptureUiEvent.OnBackToCamera -> onBackToCamera()
-            CaptureUiEvent.OnSendForManualReview -> onSendForManualReview()
+            is CaptureUiEvent.OnTypeChanged -> _uiState.update { it.copy(hints = it.hints.copy(type = event.value)) }
+            is CaptureUiEvent.OnSubmitAnalysis -> onSubmitAnalysis()
+            is CaptureUiEvent.OnBackToCamera -> onBackToCamera()
+            is CaptureUiEvent.OnSendForManualReview -> onSendForManualReview()
+            CaptureUiEvent.OnGoToGarage -> onGoToGarage()
+
+            // Settings Handlers
+            is CaptureUiEvent.OnExposureChanged -> _uiState.update { it.copy(exposureValue = event.value) }
+            is CaptureUiEvent.OnToggleGrid -> _uiState.update { it.copy(isGridEnabled = !it.isGridEnabled) }
+            is CaptureUiEvent.OnToggleHdr -> _uiState.update { it.copy(isHdrEnabled = !it.isHdrEnabled) }
+            is CaptureUiEvent.OnToggleSmartContrast -> _uiState.update { it.copy(isSmartContrastEnabled = !it.isSmartContrastEnabled) }
+            is CaptureUiEvent.OnAspectRatioChanged -> _uiState.update { it.copy(aspectRatio = event.ratio) }
+        }
+    }
+
+    private fun onGoToGarage() {
+        viewModelScope.launch {
+            _sideEffects.send(CaptureSideEffect.NavigateToCardex)
         }
     }
 
@@ -76,23 +100,70 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(currentStep = CaptureStep.PROCESSING) }
 
-            // SIMULATE AI ANALYSIS (Replace this with real API call logic)
-            updateStatus("Uploading images...")
-            delay(1500)
-            updateStatus("Analyzing geometry...")
-            delay(1500)
-            updateStatus("Matching with database...")
-            delay(1500)
+            val state = _uiState.value
+            val result = repository.registerCar(RegisterCarRequest(
+                photos = state.capturedPhotos,
+                modelHint = state.hints.model,
+                brandHint = state.hints.brand,
+                yearHint = state.hints.year,
+                typeHint = state.hints.type
+            ))
 
-            // Randomly succeed or fail for demo purposes
-            val success = true // Toggle this to test failure view
+            result.onSuccess { dto ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        currentStep = CaptureStep.RESULT_SUCCESS
+                    )
+                }
+            }
 
-            if (success) {
-                updateStatus("Car Identified!")
-                delay(500)
-                sendEffect(CaptureSideEffect.NavigateToCardex)
-            } else {
-                _uiState.update { it.copy(currentStep = CaptureStep.RESULT_FAILURE) }
+            result.onFailure { error ->
+                val errorMessage = parseErrorMessage(error)
+
+                when (error) {
+                    is HttpException -> {
+                        val code = error.code()
+                        Log.e(TAG, "API Error: $code")
+                        when (code) {
+                            409 -> {
+                                _uiState.update {
+                                    it.copy(
+                                        isLoading = false,
+                                        currentStep = CaptureStep.RESULT_FAILURE
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = errorMessage
+                    )
+                }
+            }
+        }
+    }
+
+    private fun parseErrorMessage(error: Throwable): String {
+        return when (error) {
+            is HttpException -> {
+                val code = error.code()
+                Log.e(TAG, "API Error: $code")
+                when (code) {
+                    401 -> "Session expired"
+                    404 -> "Garage not found"
+                    409 -> "Failed to recognize car"
+                    500, 502, 503 -> "Server error. Try again later."
+                    else -> "Network Error ($code)"
+                }
+            }
+            is IOException -> "No internet connection"
+            else -> {
+                Log.e(TAG, "Unknown Error", error)
+                error.message ?: "An unexpected error occurred"
             }
         }
     }
@@ -111,5 +182,9 @@ class CaptureViewModel @Inject constructor() : ViewModel() {
 
     private fun sendEffect(effect: CaptureSideEffect) {
         viewModelScope.launch { _sideEffects.send(effect) }
+    }
+
+    companion object {
+        private const val TAG = "CaptureViewModel"
     }
 }

@@ -1,5 +1,6 @@
 package com.example.pocket_road_ui.data.repository
 
+import android.content.Context
 import com.example.pocket_road_ui.data.interfaces.ICardexRepository
 import com.example.pocket_road_ui.data.remote.api.CardexApi
 import com.example.pocket_road_ui.data.remote.dto.ApiResponse
@@ -7,10 +8,17 @@ import com.example.pocket_road_ui.data.remote.dto.CarDto
 import com.example.pocket_road_ui.data.remote.dto.CarDetailsDto
 import com.example.pocket_road_ui.data.remote.dto.RegisterCarRequest
 import com.example.pocket_road_ui.data.remote.dto.UserCardexDto
+import com.example.pocket_road_ui.utils.FileUtils.getFileFromUri
+import com.example.pocket_road_ui.utils.FileUtils.getRequestBodyFromString
+import dagger.hilt.android.qualifiers.ApplicationContext
 import jakarta.inject.Inject
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 
 open class CardexRepository @Inject constructor(
-    private val api: CardexApi
+    private val api: CardexApi,
+    @ApplicationContext private val context: Context
 ) : ICardexRepository {
     override suspend fun getCardex(userId: String): Result<ApiResponse<UserCardexDto?>> {
         return try {
@@ -30,9 +38,23 @@ open class CardexRepository @Inject constructor(
         }
     }
 
-    override suspend fun registerCar(registerCarRequest: RegisterCarRequest): Result<ApiResponse<Unit>> {
+    override suspend fun registerCar(request: RegisterCarRequest): Result<ApiResponse<Unit>> {
         return try {
-            val response = api.registerCar(registerCarRequest)
+            val imageParts = request.photos.mapNotNull { uri ->
+                getFileFromUri(context, uri)?.let { file ->
+                    val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+                    MultipartBody.Part.createFormData("photos", file.name, requestFile)
+                }
+            }
+
+            val response = api.registerCar(
+                imageParts,
+                getRequestBodyFromString(request.modelHint),
+                getRequestBodyFromString(request.brandHint),
+                getRequestBodyFromString(request.yearHint),
+                getRequestBodyFromString(request.typeHint)
+            )
+
             Result.success(response)
         } catch (e: Exception) {
             Result.failure(e)
@@ -53,6 +75,7 @@ open class CardexRepositoryMock() : ICardexRepository {
                     carModel = "Fusca",
                     carBrand = "Chevrolet",
                     carRarity = "Comum",
+                    carYear = "1985",
                     photoPath = "https://tse2.mm.bing.net/th/id/OIP.y98jbdv3luA_pvE1RBWoQAHaFT?cb=ucfimg2&ucfimg=1&rs=1&pid=ImgDetMain&o=7&rm=3"
                 ),
                 CarDto(
@@ -60,6 +83,7 @@ open class CardexRepositoryMock() : ICardexRepository {
                     carModel = "Ka",
                     carBrand = "Ford",
                     carRarity = "Comum",
+                    carYear = "2018",
                     photoPath = "https://ckecu.com/wp-content/uploads/2022/03/Ford-Ka-800x620.jpg"
                 )
             )

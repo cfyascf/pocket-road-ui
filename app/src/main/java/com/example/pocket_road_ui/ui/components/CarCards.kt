@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.pocket_road_ui.domain.enums.CarRarity
 import com.example.pocket_road_ui.domain.models.Car
+import com.example.pocket_road_ui.ui.extensions.toDisplay
 import com.example.pocket_road_ui.ui.theme.AppColors
 import com.example.pocket_road_ui.ui.theme.AppTypography
 
@@ -87,7 +88,7 @@ fun CarCard(car: Car, onClick: (carId: String) -> Unit) {
                 maxLines = 1
             )
             Text(
-                text = car.brand,
+                text = "${car?.brand?.uppercase().toDisplay()} • ${car?.year.toDisplay()}",
                 style = AppTypography.Tagline.copy(fontSize = 10.sp)
             )
         }
@@ -101,6 +102,7 @@ fun CarCardPreview() {
         "abuble",
         "Ka",
         "Ford",
+        "2018",
         CarRarity.COMMON,
         "https://ckecu.com/wp-content/uploads/2022/03/Ford-Ka-800x620.jpg"
     )
